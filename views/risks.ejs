@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Management - ISO 27001 ISMS</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-color: #f8fafc;
+        }
+        
+        body { background-color: var(--light-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); min-height: 100vh; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar .nav-link { color: rgba(255,255,255,0.9); padding: 0.75rem 1rem; margin: 0.25rem 0; border-radius: 0.5rem; transition: all 0.3s ease; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: rgba(255,255,255,0.2); color: white; transform: translateX(5px); }
+        .card { border: none; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .iso-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px; }
+        .certification-badge { position: absolute; top: 1rem; right: 1rem; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #1f2937; padding: 0.5rem 1rem; border-radius: 2rem; font-weight: 600; font-size: 0.85rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; }
+        .table th { background-color: var(--primary-color); color: white; border: none; }
+        .risk-matrix { display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; margin: 1rem 0; }
+        .risk-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; border-radius: 4px; }
+        .risk-low { background-color: var(--success-color); }
+        .risk-medium { background-color: var(--warning-color); }
+        .risk-high { background-color: var(--danger-color); }
+        .risk-critical { background-color: #8b0000; }
+    </style>
+</head>
+<body>
+    <!-- Certification Badge -->
+    <div class="certification-badge">
+        <i class="fas fa-certificate me-1"></i>
+        ISO 27001 Certified
+    </div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="iso-logo">ISO</div>
+                        <h5 class="text-white mb-0">27001 ISMS</h5>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/assets"><i class="fas fa-server me-2"></i>Asset Management</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/risks"><i class="fas fa-exclamation-triangle me-2"></i>Risk Management</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/incidents"><i class="fas fa-bell me-2"></i>Incidents</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/policies"><i class="fas fa-file-alt me-2"></i>Policies</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/controls"><i class="fas fa-shield-alt me-2"></i>Security Controls</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/audits"><i class="fas fa-search me-2"></i>Audits</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/reports"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="pt-3 pb-2 mb-3">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-4">
+                        <h1 class="h2 text-primary">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Risk Management (ISO 27001 A.6.1.2)
+                        </h1>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRiskModal">
+                            <i class="fas fa-plus me-1"></i>Add Risk
+                        </button>
+                    </div>
+                    
+                    <!-- Risk Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card text-center bg-danger text-white">
+                                <div class="card-body">
+                                    <h3><%= risks.filter(r => r.riskScore >= 15).length %></h3>
+                                    <p class="mb-0">High Risks</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center bg-warning text-white">
+                                <div class="card-body">
+                                    <h3><%= risks.filter(r => r.riskScore >= 8 && r.riskScore < 15).length %></h3>
+                                    <p class="mb-0">Medium Risks</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center bg-success text-white">
+                                <div class="card-body">
+                                    <h3><%= risks.filter(r => r.riskScore < 8).length %></h3>
+                                    <p class="mb-0">Low Risks</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card text-center bg-primary text-white">
+                                <div class="card-body">
+                                    <h3><%= risks.filter(r => r.status === 'Open').length %></h3>
+                                    <p class="mb-0">Open Risks</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Risk Matrix -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-table me-2"></i>Risk Assessment Matrix</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="risk-matrix">
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Impact →<br>Probability ↓</div>
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Very Low (1)</div>
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Low (2)</div>
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Medium (3)</div>
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">High (4)</div>
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Very High (5)</div>
+                                
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Very High (5)</div>
+                                <div class="risk-cell risk-medium">5</div>
+                                <div class="risk-cell risk-high">10</div>
+                                <div class="risk-cell risk-high">15</div>
+                                <div class="risk-cell risk-critical">20</div>
+                                <div class="risk-cell risk-critical">25</div>
+                                
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">High (4)</div>
+                                <div class="risk-cell risk-low">4</div>
+                                <div class="risk-cell risk-medium">8</div>
+                                <div class="risk-cell risk-medium">12</div>
+                                <div class="risk-cell risk-high">16</div>
+                                <div class="risk-cell risk-critical">20</div>
+                                
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Medium (3)</div>
+                                <div class="risk-cell risk-low">3</div>
+                                <div class="risk-cell risk-low">6</div>
+                                <div class="risk-cell risk-medium">9</div>
+                                <div class="risk-cell risk-medium">12</div>
+                                <div class="risk-cell risk-high">15</div>
+                                
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Low (2)</div>
+                                <div class="risk-cell risk-low">2</div>
+                                <div class="risk-cell risk-low">4</div>
+                                <div class="risk-cell risk-low">6</div>
+                                <div class="risk-cell risk-medium">8</div>
+                                <div class="risk-cell risk-medium">10</div>
+                                
+                                <div class="bg-secondary text-white d-flex align-items-center justify-content-center">Very Low (1)</div>
+                                <div class="risk-cell risk-low">1</div>
+                                <div class="risk-cell risk-low">2</div>
+                                <div class="risk-cell risk-low">3</div>
+                                <div class="risk-cell risk-low">4</div>
+                                <div class="risk-cell risk-medium">5</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Risk Register -->
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Risk Register</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped data-table" id="risksTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Risk Title</th>
+                                            <th>Category</th>
+                                            <th>Probability</th>
+                                            <th>Impact</th>
+                                            <th>Risk Score</th>
+                                            <th>Status</th>
+                                            <th>Owner</th>
+                                            <th>Due Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% risks.forEach(risk => { %>
+                                            <tr>
+                                                <td>
+                                                    <strong><%= risk.title %></strong><br>
+                                                    <small class="text-muted"><%= risk.description %></small>
+                                                </td>
+                                                <td><%= risk.category %></td>
+                                                <td><%= risk.probability %></td>
+                                                <td><%= risk.impact %></td>
+                                                <td>
+                                                    <span class="badge bg-<%= risk.riskScore >= 15 ? 'danger' : risk.riskScore >= 8 ? 'warning' : 'success' %>">
+                                                        <%= risk.riskScore %>
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    <span class="badge bg-<%= risk.status === 'Open' ? 'danger' : risk.status === 'In Progress' ? 'warning' : 'success' %>">
+                                                        <%= risk.status %>
+                                                    </span>
+                                                </td>
+                                                <td><%= risk.owner %></td>
+                                                <td><%= moment(risk.dueDate).format('DD/MM/YYYY') %></td>
+                                                <td>
+                                                    <button class="btn btn-sm btn-outline-primary" title="Edit Risk">
+                                                        <i class="fas fa-edit"></i>
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-info" title="View Details">
+                                                        <i class="fas fa-eye"></i>
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Add Risk Modal -->
+    <div class="modal fade" id="addRiskModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-plus me-2"></i>Add New Risk</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="/risks" method="POST">
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="title" class="form-label">Risk Title *</label>
+                                    <input type="text" class="form-control" id="title" name="title" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="category" class="form-label">Category *</label>
+                                    <select class="form-select" id="category" name="category" required>
+                                        <option value="">Select Category</option>
+                                        <option value="Data Security">Data Security</option>
+                                        <option value="System Security">System Security</option>
+                                        <option value="Network Security">Network Security</option>
+                                        <option value="Physical Security">Physical Security</option>
+                                        <option value="Human Factor">Human Factor</option>
+                                        <option value="Operational">Operational</option>
+                                        <option value="Legal & Compliance">Legal & Compliance</option>
+                                        <option value="Business Continuity">Business Continuity</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="description" class="form-label">Description *</label>
+                                    <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="probability" class="form-label">Probability (1-5) *</label>
+                                    <select class="form-select" id="probability" name="probability" required>
+                                        <option value="">Select Probability</option>
+                                        <option value="1">1 - Very Low</option>
+                                        <option value="2">2 - Low</option>
+                                        <option value="3">3 - Medium</option>
+                                        <option value="4">4 - High</option>
+                                        <option value="5">5 - Very High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="impact" class="form-label">Impact (1-5) *</label>
+                                    <select class="form-select" id="impact" name="impact" required>
+                                        <option value="">Select Impact</option>
+                                        <option value="1">1 - Very Low</option>
+                                        <option value="2">2 - Low</option>
+                                        <option value="3">3 - Medium</option>
+                                        <option value="4">4 - High</option>
+                                        <option value="5">5 - Very High</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="owner" class="form-label">Risk Owner *</label>
+                                    <input type="text" class="form-control" id="owner" name="owner" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="dueDate" class="form-label">Due Date *</label>
+                                    <input type="date" class="form-control" id="dueDate" name="dueDate" required>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <div class="mb-3">
+                                    <label for="mitigation" class="form-label">Mitigation Strategy</label>
+                                    <textarea class="form-control" id="mitigation" name="mitigation" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save me-1"></i>Add Risk</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            $('#risksTable').DataTable({
+                responsive: true,
+                pageLength: 10,
+                order: [[4, 'desc']] // Sort by Risk Score
+            });
+        });
+    </script>
+</body>
+</html>

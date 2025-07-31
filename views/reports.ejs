@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports & Analytics - ISO 27001 ISMS</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --light-color: #f8fafc;
+        }
+        body { background-color: var(--light-color); font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .sidebar { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); min-height: 100vh; box-shadow: 2px 0 10px rgba(0,0,0,0.1); }
+        .sidebar .nav-link { color: rgba(255,255,255,0.9); padding: 0.75rem 1rem; margin: 0.25rem 0; border-radius: 0.5rem; transition: all 0.3s ease; }
+        .sidebar .nav-link:hover, .sidebar .nav-link.active { background-color: rgba(255,255,255,0.2); color: white; transform: translateX(5px); }
+        .card { border: none; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .iso-logo { width: 40px; height: 40px; background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; margin-right: 10px; }
+        .certification-badge { position: absolute; top: 1rem; right: 1rem; background: linear-gradient(135deg, #ffd700, #ffed4e); color: #1f2937; padding: 0.5rem 1rem; border-radius: 2rem; font-weight: 600; font-size: 0.85rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); z-index: 1000; }
+        .chart-container { position: relative; height: 300px; margin: 1rem 0; }
+    </style>
+</head>
+<body>
+    <!-- Certification Badge -->
+    <div class="certification-badge">
+        <i class="fas fa-certificate me-1"></i>
+        ISO 27001 Certified
+    </div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="iso-logo">ISO</div>
+                        <h5 class="text-white mb-0">27001 ISMS</h5>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item"><a class="nav-link" href="/"><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/assets"><i class="fas fa-server me-2"></i>Asset Management</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/risks"><i class="fas fa-exclamation-triangle me-2"></i>Risk Management</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/incidents"><i class="fas fa-bell me-2"></i>Incidents</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/policies"><i class="fas fa-file-alt me-2"></i>Policies</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/controls"><i class="fas fa-shield-alt me-2"></i>Security Controls</a></li>
+                        <li class="nav-item"><a class="nav-link" href="/audits"><i class="fas fa-search me-2"></i>Audits</a></li>
+                        <li class="nav-item"><a class="nav-link active" href="/reports"><i class="fas fa-chart-bar me-2"></i>Reports</a></li>
+                    </ul>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="pt-3 pb-2 mb-3">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-4">
+                        <h1 class="h2 text-primary">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Reports & Analytics
+                        </h1>
+                        <div class="btn-group" role="group">
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-download me-1"></i>Export PDF
+                            </button>
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-file-excel me-1"></i>Export Excel
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Executive Summary -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Executive Summary</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 text-center">
+                                            <h3 class="text-success">85%</h3>
+                                            <p class="text-muted">Overall Compliance</p>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <h3 class="text-warning">12</h3>
+                                            <p class="text-muted">Active Risks</p>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <h3 class="text-danger">3</h3>
+                                            <p class="text-muted">Open Incidents</p>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <h3 class="text-info">98%</h3>
+                                            <p class="text-muted">Asset Coverage</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row 1 -->
+                    <div class="row mb-4">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>Risk Distribution by Category</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="riskCategoryChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-chart-line me-2"></i>Incident Trends (Last 6 Months)</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="incidentTrendChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row 2 -->
+                    <div class="row mb-4">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-shield-alt me-2"></i>Control Effectiveness</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="controlEffectivenessChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>Compliance by Category</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="complianceChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Detailed Reports -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0"><i class="fas fa-file-alt me-2"></i>Available Reports</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-primary">
+                                                <div class="card-body text-center">
+                                                    <i class="fas fa-file-pdf fa-3x text-danger mb-3"></i>
+                                                    <h6>Risk Assessment Report</h6>
+                                                    <p class="text-muted small">Comprehensive risk analysis and mitigation strategies</p>
+                                                    <button class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-success">
+                                                <div class="card-body text-center">
+                                                    <i class="fas fa-file-excel fa-3x text-success mb-3"></i>
+                                                    <h6>Compliance Matrix</h6>
+                                                    <p class="text-muted small">ISO 27001 controls implementation status</p>
+                                                    <button class="btn btn-outline-success btn-sm">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-warning">
+                                                <div class="card-body text-center">
+                                                    <i class="fas fa-file-powerpoint fa-3x text-warning mb-3"></i>
+                                                    <h6>Executive Dashboard</h6>
+                                                    <p class="text-muted small">High-level security posture presentation</p>
+                                                    <button class="btn btn-outline-warning btn-sm">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-info">
+                                                <div class="card-body text-center">
+                                                    <i class="fas fa-file-alt fa-3x text-info mb-3"></i>
+                                                    <h6>Incident Response Report</h6>
+                                                    <p class="text-muted small">Security incidents analysis and response metrics</p>
+                                                    <button class="btn btn-outline-info btn-sm">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-secondary">
+                                                <div class="card-body text-center">
+                                                    <i class="fas fa-file-csv fa-3x text-secondary mb-3"></i>
+                                                    <h6>Asset Inventory</h6>
+                                                    <p class="text-muted small">Complete asset register with classifications</p>
+                                                    <button class="btn btn-outline-secondary btn-sm">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 mb-3">
+                                            <div class="card border-dark">
+                                                <div class="card-body text-center">
+                                                    <i class="fas fa-file-archive fa-3x text-dark mb-3"></i>
+                                                    <h6>Audit Package</h6>
+                                                    <p class="text-muted small">Complete audit trail and evidence package</p>
+                                                    <button class="btn btn-outline-dark btn-sm">
+                                                        <i class="fas fa-download me-1"></i>Download
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Risk Category Chart
+        const riskCategoryCtx = document.getElementById('riskCategoryChart').getContext('2d');
+        new Chart(riskCategoryCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Data Security', 'System Security', 'Human Factor', 'Operational', 'Physical Security'],
+                datasets: [{
+                    data: [30, 25, 20, 15, 10],
+                    backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#10b981', '#8b5cf6']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Incident Trend Chart
+        const incidentTrendCtx = document.getElementById('incidentTrendChart').getContext('2d');
+        new Chart(incidentTrendCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                datasets: [{
+                    label: 'Security Incidents',
+                    data: [5, 3, 8, 4, 2, 6],
+                    borderColor: '#ef4444',
+                    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                }
+            }
+        });
+        
+        // Control Effectiveness Chart
+        const controlEffectivenessCtx = document.getElementById('controlEffectivenessChart').getContext('2d');
+        new Chart(controlEffectivenessCtx, {
+            type: 'radar',
+            data: {
+                labels: ['Organizational', 'Human Resources', 'Physical', 'Communications', 'Access Control', 'System Security'],
+                datasets: [{
+                    label: 'Effectiveness %',
+                    data: [85, 78, 92, 88, 95, 82],
+                    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                    borderColor: '#3b82f6',
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        max: 100
+                    }
+                }
+            }
+        });
+        
+        // Compliance Chart
+        const complianceCtx = document.getElementById('complianceChart').getContext('2d');
+        new Chart(complianceCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Information Security', 'Asset Management', 'Access Control', 'Cryptography', 'Physical Security', 'Operations Security'],
+                datasets: [{
+                    label: 'Compliance %',
+                    data: [95, 88, 92, 85, 90, 87],
+                    backgroundColor: ['#10b981', '#10b981', '#10b981', '#f59e0b', '#10b981', '#10b981'],
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        max: 100,
+                        ticks: {
+                            callback: function(value) {
+                                return value + '%';
+                            }
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,511 @@
+<% 
+const currentPage = 'dashboard';
+const title = 'ISO 27001 ISMS Dashboard - Professional Security Management System';
+%>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    
+    <!-- Security Headers -->
+    <meta http-equiv="X-Content-Type-Options" content="nosniff">
+    <meta http-equiv="X-Frame-Options" content="DENY">
+    <meta http-equiv="X-XSS-Protection" content="1; mode=block">
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #1e3a8a;
+            --secondary-color: #3b82f6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --dark-color: #1f2937;
+            --light-color: #f8fafc;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .sidebar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            min-height: 100vh;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.9);
+            padding: 0.75rem 1rem;
+            margin: 0.25rem 0;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            background-color: rgba(255,255,255,0.2);
+            color: white;
+            transform: translateX(5px);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card.success {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+        }
+        
+        .stat-card.warning {
+            background: linear-gradient(135deg, var(--warning-color), #d97706);
+        }
+        
+        .stat-card.danger {
+            background: linear-gradient(135deg, var(--danger-color), #dc2626);
+        }
+        
+        .stat-card .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+        
+        .stat-card .stat-icon {
+            font-size: 3rem;
+            opacity: 0.3;
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .iso-logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .certification-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #1f2937;
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        
+        .badge-risk-high {
+            background-color: var(--danger-color);
+        }
+        
+        .badge-risk-medium {
+            background-color: var(--warning-color);
+        }
+        
+        .badge-risk-low {
+            background-color: var(--success-color);
+        }
+        
+        .table th {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+        }
+        
+        .progress {
+            height: 0.75rem;
+            border-radius: 0.5rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Certification Badge -->
+    <div class="certification-badge">
+        <i class="fas fa-certificate me-1"></i>
+        ISO 27001 Certified
+    </div>
+    
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="iso-logo">ISO</div>
+                        <h5 class="text-white mb-0">27001 ISMS</h5>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="/">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/assets">
+                                <i class="fas fa-server me-2"></i>
+                                Asset Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/risks">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Risk Management
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/incidents">
+                                <i class="fas fa-bell me-2"></i>
+                                Incidents
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/policies">
+                                <i class="fas fa-file-alt me-2"></i>
+                                Policies
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/controls">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                Security Controls
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/audits">
+                                <i class="fas fa-search me-2"></i>
+                                Audits
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/reports">
+                                <i class="fas fa-chart-bar me-2"></i>
+                                Reports
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white my-4">
+                    
+                    <div class="text-white small">
+                        <h6 class="text-white">ISO 27001:2013</h6>
+                        <p class="mb-1">Information Security Management</p>
+                        <p class="mb-0">Professional Implementation</p>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="pt-3 pb-2 mb-3">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center border-bottom mb-4">
+                        <h1 class="h2 text-primary">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Information Security Management System Dashboard
+                        </h1>
+                        
+                    </div>
+                    
+                    <!-- Key Metrics -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="stat-card success position-relative">
+                                <div class="stat-number"><%= data.totalAssets %></div>
+                                <div class="stat-label">Total Assets</div>
+                                <i class="fas fa-server stat-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="stat-card warning position-relative">
+                                <div class="stat-number"><%= data.activeRisks %></div>
+                                <div class="stat-label">Active Risks</div>
+                                <i class="fas fa-exclamation-triangle stat-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="stat-card danger position-relative">
+                                <div class="stat-number"><%= data.openIncidents %></div>
+                                <div class="stat-label">Open Incidents</div>
+                                <i class="fas fa-bell stat-icon"></i>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="stat-card position-relative">
+                                <div class="stat-number"><%= Math.round((data.implementedControls / data.totalControls) * 100) %>%</div>
+                                <div class="stat-label">Controls Compliance</div>
+                                <i class="fas fa-shield-alt stat-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts and Analytics -->
+                    <div class="row mb-4">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-pie me-2"></i>
+                                        Risk Distribution
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="riskChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-chart-bar me-2"></i>
+                                        Security Controls Status
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="controlsChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recent Activities -->
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-clock me-2"></i>
+                                        Recent Incidents
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <% if (data.recentIncidents.length > 0) { %>
+                                        <% data.recentIncidents.forEach(incident => { %>
+                                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="mb-1"><%= incident.title %></h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-user me-1"></i>
+                                                        <%= incident.reportedBy %> • 
+                                                        <%= moment(incident.reportedDate).fromNow() %>
+                                                    </small>
+                                                </div>
+                                                <span class="badge bg-<%= incident.severity === 'High' ? 'danger' : incident.severity === 'Medium' ? 'warning' : 'info' %>">
+                                                    <%= incident.severity %>
+                                                </span>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <p class="text-muted mb-0">No recent incidents</p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        Risk Overview
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <% if (data.recentRisks.length > 0) { %>
+                                        <% data.recentRisks.forEach(risk => { %>
+                                            <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                                <div>
+                                                    <h6 class="mb-1"><%= risk.title %></h6>
+                                                    <small class="text-muted">
+                                                        <i class="fas fa-user me-1"></i>
+                                                        <%= risk.owner %> • 
+                                                        Score: <%= risk.riskScore %>
+                                                    </small>
+                                                </div>
+                                                <span class="badge badge-risk-<%= risk.riskScore >= 15 ? 'high' : risk.riskScore >= 8 ? 'medium' : 'low' %>">
+                                                    <%= risk.riskScore >= 15 ? 'High' : risk.riskScore >= 8 ? 'Medium' : 'Low' %>
+                                                </span>
+                                            </div>
+                                        <% }); %>
+                                    <% } else { %>
+                                        <p class="text-muted mb-0">No active risks</p>
+                                    <% } %>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Compliance Summary -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">
+                                        <i class="fas fa-check-circle me-2"></i>
+                                        ISO 27001 Compliance Summary
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>Organizational Controls</h6>
+                                            <div class="progress mb-3">
+                                                <div class="progress-bar bg-success" style="width: 85%">85%</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Technical Controls</h6>
+                                            <div class="progress mb-3">
+                                                <div class="progress-bar bg-warning" style="width: 70%">70%</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Physical Controls</h6>
+                                            <div class="progress mb-3">
+                                                <div class="progress-bar bg-success" style="width: 92%">92%</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>Legal & Compliance</h6>
+                                            <div class="progress mb-3">
+                                                <div class="progress-bar bg-success" style="width: 88%">88%</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Charts -->
+    <script>
+        // Risk Distribution Chart
+        const riskCtx = document.getElementById('riskChart').getContext('2d');
+        new Chart(riskCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['High Risk', 'Medium Risk', 'Low Risk'],
+                datasets: [{
+                    data: [<%- data.riskDistribution.high %>, <%- data.riskDistribution.medium %>, <%- data.riskDistribution.low %>],
+                    backgroundColor: [
+                        '#ef4444',
+                        '#f59e0b',
+                        '#10b981'
+                    ],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+        
+        // Controls Status Chart
+        const controlsCtx = document.getElementById('controlsChart').getContext('2d');
+        new Chart(controlsCtx, {
+            type: 'bar',
+            data: {
+                labels: ['Implemented', 'Partially Implemented', 'Not Implemented'],
+                datasets: [{
+                    label: 'Security Controls',
+                    data: [<%- data.implementedControls %>, 2, 1],
+                    backgroundColor: [
+                        '#10b981',
+                        '#f59e0b',
+                        '#ef4444'
+                    ],
+                    borderWidth: 0,
+                    borderRadius: 5
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
