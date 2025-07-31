@@ -70,10 +70,6 @@ npm install -g nodemon
 nodemon server.js
 ```
 
-## 📄 License
-
-This project is licensed under the MIT License.
-
-## 🤝 Contributing
+##  Contributing
 
 Feel free to submit issues and enhancement requests!
